@@ -1,0 +1,16 @@
+{
+	"authors": [
+		"Armando Arredondo"
+	],
+	"copyright": "Copyright © 2023, Armando Arredondo",
+	"description": "Symmetrical Islands Site Frequency Spectrum",
+	"dflags-ldc": [
+		"-mcpu=native"
+	],
+	"libs": [
+		"lapack",
+		"blas"
+	],
+	"license": "MIT",
+	"name": "SISiFS"
+}
