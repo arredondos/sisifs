@@ -103,34 +103,17 @@ will result in three computations of an expected SFS, where the sampling vectors
 
 ### Reference
 Following is a brief description of all the supported flags and their default values:
-``` 
- --help, -h      Prints this help.
- --samples, -k <string>
-                 Total number of haploid lineages in the sample. May be vectorized. Default is 12.
- --demes, -n <string>
-                 Number of demes or islands in the model. May be vectorized. Default is 10.
- --migration, -M <string>
-                 Migration rate M of an n-island model. May be vectorized. Default is 1.0.
- --size, -c <string>
-                 Relative deme size c in an n-island model. May be vectorized. Default is 1.0.
- --sv <string>   Sampling vector or initial distribution of sampled lineages across the demes.
-                 Default is [12].
- --repetitions, -r <string>
-                 Number of times each SFS computation is performed. Default is
-                 1.
- --epsilon, -e <string>
-                 Maximum absolute error tolerance for the normalized expected
-                 SFS. Default is 1e-6.
- --steps, -d <string>
-                 Approximate number of error introspection steps during
-                 computation. Default is 1.
- --omega <string>
-                 Relaxation parameter for the SOR method. Default is 1.25.
- --threads <string>
-                 Number of additional execution threads in parallel workloads.
-                 Default is one less than the total system threads as reported
-                 by the OS.
- --verbosity, -v <int>
-                 Controls the level of reporting detail. The three possible
-                 values are 0, 1 and 2. Default is 0
-```
+| Short form | Long form | Description | Default value
+|---|---|---|---|
+| -h | --help | Prints a help message. | |
+| -n | --demes | Number of demes or islands in the model. May be vectorized. | 10 |
+| -M | --migration | Migration rate M of an n-island model. May be vectorized. | 1 |
+| -c | --size | Relative deme size c in an n-island model. May be vectorized. | 1 |
+| -k | --samples | Total number of haploid lineages in the sample. May be vectorized. | 12 |
+|  | --sv | Sampling vector or initial distribution of sampled lineages across the demes. | [12] |
+| -r | --repetitions | Number of times each SFS computation is performed. | 1 |
+| -e | --epsilon | Maximum absolute error tolerance for the normalized expected SFS. | 1e-6 |
+| -d | --steps | Approximate number of error introspection steps during computation. | 1 |
+| | --omega | Relaxation parameter for the SOR method. | 1.25 |
+| | --threads | Number of additional execution threads in parallel workloads. | #cores - 1 |
+| -v | --verbosity | Level of reporting detail. The three possible values are 0, 1 and 2. | 1 |
