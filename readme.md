@@ -13,7 +13,7 @@ The simplest case of the symmetrical n-island is showcased in this implementatio
 
 ## Quick start
 
-Pre-compiled binaries are available for Windows and Linux in the [releases section](TODO). Download your preferred version and run it from a terminal. 
+Pre-compiled binaries are available for Windows and Linux in the [releases section](https://github.com/arredondos/sisifs/releases). Download your preferred version and run it from a terminal. 
 
 *Linux:*
 ``` bash
