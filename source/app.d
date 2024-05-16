@@ -109,7 +109,7 @@ int main(string[] args) {
 		enforce(sv_sum == 1.0, "Invalid parameter (sv): when specifying multiple values for k, the sampling vector must be a probability distribution.");
 		foreach(byte ki; k) {
 			auto remaining = ki;
-			sv ~= options.sv.to!(double[]).map!(x => {
+			sv ~= options.sv.to!(double[]).map!(x => () {
 				auto kii = min(remaining, ceil(x * ki).to!byte);
 				remaining -= kii;
 				return kii;
@@ -195,8 +195,6 @@ int main(string[] args) {
 		}
 	}
 	
-	// write("Done.");
-	// readln();
 	return 0;
 }
 
@@ -220,19 +218,19 @@ struct Options {
     OptionFlag help;
 
 	@Option("samples", "k")
-	@Help(format!"Total number of haploid lineages in the sample. Default is %s."(k0))
+	@Help(format!"Total number of haploid lineages in the sample. May be vectorized. Default is %s."(k0))
 	string k = k0;
 
 	@Option("demes", "n")
-	@Help(format!"Number of demes or islands in the model. Default is %s."(n0))
+	@Help(format!"Number of demes or islands in the model. May be vectorized. Default is %s."(n0))
 	string n = n0;
 
 	@Option("migration", "M")
-	@Help(format!"Migration rate M of an n-island model. Default is %s."(M0))
+	@Help(format!"Migration rate M of an n-island model. May be vectorized. Default is %s."(M0))
 	string M = M0;
 
 	@Option("size", "c")
-	@Help(format!"Relative deme size c in an n-island model. Default is %s."(c0))
+	@Help(format!"Relative deme size c in an n-island model. May be vectorized. Default is %s."(c0))
 	string c = c0;
 
 	@Option("sv")
@@ -252,7 +250,7 @@ struct Options {
 	string d = d0;
 
 	@Option("omega")
-	@Help(format!"Relaxation paramterer for the SOR method. Default is %s."(omega0))
+	@Help(format!"Relaxation parameter for the SOR method. Default is %s."(omega0))
 	string omega = omega0;
 
 	@Option("threads")
@@ -263,10 +261,6 @@ struct Options {
 	@Option("verbosity", "v")
 	@Help(format!"Controls the level of reporting detail. The three possible values are 0, 1 and 2. Default is %s"(v0))
 	int v = v0;
-
-    // @Option("lowmem")
-    // @Help("Specify this option in order to lower memory usange during the generation of .qmat files.")
-    // OptionFlag lowmem;
 }
 
 enum compare_to_panmictic_sfs = false;
@@ -296,7 +290,6 @@ void singleSFSRun(int k, int n, double M, double c, byte[] sv,
 	}
 
 	auto sw = StopWatch(AutoStart.no);
-	// auto times = new double[] (reps);
 	auto best_time = double.max;
 	auto best_i = 0;
 	
@@ -321,7 +314,6 @@ void singleSFSRun(int k, int n, double M, double c, byte[] sv,
 			writeln("distance from panmictic SFS = ", error);
 		}
 
-		// times[i] = sw.peek.total!"msecs" / 1e3;
 		auto time = sw.peek.total!"msecs" / 1e3;
 		if(time < best_time) {
 			best_time = time;
@@ -337,7 +329,6 @@ void singleSFSRun(int k, int n, double M, double c, byte[] sv,
 	writeln("esfs = ", afs);
 	if(reps > 1) {
 		writefln("fastest repetition was #%s at %s seconds.", best_i + 1, best_time);
-		// writeln("fastest repetition time = ", best_time);
 	}
 	writeln();
 }
