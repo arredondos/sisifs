@@ -5,9 +5,9 @@ import std.stdio;
 
 import mir.ndslice;
 import mir.sparse;
-// import ldc.attributes : fastmath;
+import ldc.attributes : fastmath;
 
-// @fastmath:
+@fastmath:
 
 alias CSMatrix = ReturnType!(compress!(uint, uint, Contiguous, 2, FieldIterator!(SparseField!double)));
 alias CSIntMatrix = ReturnType!(compress!(uint, uint, Contiguous, 2, FieldIterator!(SparseField!int)));
@@ -163,10 +163,6 @@ auto jacobi(T, Q)(T a, Q b, double tol = 1e-8, int maxIters = 0) {
         y[] = x[];
     }
 
-    // import std.stdio;
-    // if(iters > maxIters) {
-    //     writefln("Jacobi: all %s iterations consumed. Norm = %s.", maxIters, norm);
-    // }
     a.diagonal[] = d[];
     return x;
 }
@@ -174,9 +170,6 @@ auto jacobi(T, Q)(T a, Q b, double tol = 1e-8, int maxIters = 0) {
 auto sor(T, Q)(T a, Q b, double omega, double tol = 1.0e-8, int maxIters = 100) {
     import lubeck : mtimes;
 
-    // auto sw = StopWatch(AutoStart.yes);
-    // double time_mtimes = 0.0;
-    
     import std.algorithm.iteration : reduce;
     import std.range : iota;
     import std.math : fabs;
@@ -187,29 +180,16 @@ auto sor(T, Q)(T a, Q b, double omega, double tol = 1.0e-8, int maxIters = 100) 
     auto y = x.slice;
     int iters = 0, multiplications = 0;
 
-    // auto sparse_a = sparse!double(n, n);
-    // foreach(item; a.byKeyValue()) {
-    //     sparse_a[item.key.i, item.key.j] = item.value;
-    // }
-    // auto compressed_sparse_a = sparse_a.compress();
     while(true) {
 
-        // sw.reset();
         foreach(immutable i; iota!int(n)) {
-            // immutable s = mtimes(a[i], x) - a[i, i] * x[i];
-            // x[i] += (-x[i] + (b[i] - s) / a[i, i]) * omega;
-            
             immutable s = mtimes(a[i], x);
-            // auto v = sparse_a[i].compress();
-            // immutable s = dot(v, v);
             x[i] += omega * (b[i] - s) / a[i, i];
             ++multiplications;
         }
-        // time_mtimes += sw.peek.total!"msecs";
         
         immutable norm = reduce!((a, b) => max(fabs(a), fabs(b)))(0.0, x[] - y[]);
         if(norm < tol) {
-            // writeln(iters, " iterations. ", multiplications, " multiplications.");
             return x;
         }
 
@@ -218,113 +198,8 @@ auto sor(T, Q)(T a, Q b, double omega, double tol = 1.0e-8, int maxIters = 100) 
     }
 
     assert(0);
-    //writeln("failed convergence in specified iterations");
-    // writeln("converged after ", iters, " iterations!");
-    // return x;    
 }
 
-// auto aosor(Sparse!(double, 2) a, Sparse!(double, 2) b, 
-//            double tol = 1e-08, int maxIters = 0) {
-
-//     import mir.sparse.blas.gemv : gemv;
-//     import mir.sparse.blas.axpy : axpy;
-//     import mir.sparse.blas.dot : dot;
-    
-//     import std.algorithm.iteration : reduce;
-//     import std.range : iota;
-//     import std.math : fabs;
-
-//     immutable n = cast(int) b.length;
-//     immutable beta = 1.0; 
-//     immutable gamma = 1.0;
-    
-//     // compressed_vector x = new CompressedField!(double)(n);// slice!double([n], 0.0);
-//     // compressed_vector y = new CompressedField!(double)(n);// slice!double([n], 0.0);
-//     // compressed_vector r = new CompressedField!(double)(n);// slice!double([n], 0.0);
-//     // compressed_vector u = new CompressedField!(double)(n);// slice!double([n], 0.0);
-//     // compressed_vector v = new CompressedField!(double)(n);// slice!double([n], 0.0);
-//     // compressed_vector w = new CompressedField!(double)(n);// slice!double([n], 0.0);
-//     // compressed_vector s = new CompressedField!(double)(n);// slice!double([n], 0.0);
-//     // compressed_vector t = new CompressedField!(double)(n);// slice!double([n], 0.0);
-
-//     Sparse!(double, 2) l;
-//     foreach(immutable k; iota(1, n)) {
-//         l[k][0 .. k-1] = -a[k][0 .. k-1];
-//     }
-
-//     auto d = a.diagonal.slice;
-//     auto compressed_a = a.compress();
-//     auto compressed_b = b.compress();
-//     auto compressed_l = l.compress();
-
-//     alias compressed_vector = typeof(compressed_b);
-//     auto x = slice!double([n], 0.0); /*compressed_vector*/ 
-//     auto y = slice!double([n], 0.0); /*compressed_vector*/ 
-//     auto r = slice!double([n], 0.0); /*compressed_vector*/ 
-//     auto u = slice!double([n], 0.0); /*compressed_vector*/ 
-//     auto v = slice!double([n], 0.0); /*compressed_vector*/ 
-//     auto w = slice!double([n], 0.0); /*compressed_vector*/ 
-//     auto s = slice!double([n], 0.0); /*compressed_vector*/ 
-//     auto t = slice!double([n], 0.0); /*compressed_vector*/ 
-
-//     int iters = 0;
-//     while(iters < maxIters) {
-
-//         // r = b - A x
-//         gemv(-1.0, compressed_a, x, 0.0, r);
-//         axpy(1.0, b, r.field);
-//         // r[] += b;
-
-//         // u = L r; v = A r; t = L u; s = A u; w = A t
-//         gemv(1.0, compressed_l, r, 0.0, u);
-//         gemv(1.0, compressed_a, r, 0.0, v);
-//         gemv(1.0, compressed_l, u, 0.0, t);
-//         gemv(1.0, compressed_a, u, 0.0, s);
-//         gemv(1.0, compressed_a, t, 0.0, w);
-
-//         double[5] delta = [
-//             2 * beta * dot(r, s) - dot(v, v),
-//             (beta * beta + 2 * gamma * gamma) * dot(r, w) - 3 * beta * dot(v, s),
-//             (beta * beta + 3 * gamma * gamma) * dot(v, w) + 2 * beta * beta * dot(s, s),
-//             beta * (beta * beta + 4 * gamma * gamma) * dot(s, w),
-//             gamma * gamma * (beta * beta + 2 * gamma * gamma) * dot(w, w)
-//         ];
-//         delta[] /= dot(r, v);
-        
-//         {/* get omega from newton-raphson */}
-//         auto omega = 1.0;
-//         while(true) {
-//             immutable f = 1 + delta[0] * omega + delta[1] * omega^^2 - delta[2] * omega^^3 - delta[3] * omega^^4 - delta[4] * omega^^5;
-//             immutable fp = delta[0] + 2 * delta[1] * omega - 3 * delta[2] * omega^^2 - 4 * delta[3] * omega^^3 - 5 * delta[4] * omega^^4;
-//             immutable corr = -f/fp;
-            
-//             if(fabs(corr) < tol * 10)
-//                 break;
-            
-//             omega += corr;
-//         }
-
-//         // compute y from (D - omega L)y == r
-//         y[0] = r[0] / d[0];
-//         foreach(immutable k; iota(1, n)) {
-//             y[k] = (r[k] - omega * dot(a[k, 1 .. k-1], y[1 .. k-1])) / d[k];
-//         }
-
-//         // x = x + omega y
-//         axpy(omega, y, x);
-//         // x[] += y;
-        
-//         immutable norm = y.map!fabs.reduce!max;
-//         if(norm < tol) {
-//             return x;
-//         }
-
-//         ++iters;
-//     }    
-// }
-
-
-//auto InitializePartitions(inout int n, inout int max_m) {
 auto getPartition(inout int k, inout int max_m) {
 	import std.range;
 
@@ -340,7 +215,6 @@ auto getPartition(inout int k, inout int max_m) {
 
 		while(true) {
 			if(m <= max_m) {
-				//writeln(a[1 .. m + 1]);
 				partition ~= assumeSorted!"a > b"(a[1 .. m + 1].dup);
 			}
 
@@ -351,7 +225,6 @@ auto getPartition(inout int k, inout int max_m) {
 		}
 
 		if(q == 0) {
-			//writeln("  P(", k, ", ", max_m, ") = ", partition);
 			return partition;
 		}
 
