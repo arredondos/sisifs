@@ -87,22 +87,22 @@ esfs = [0.207535, 0.134109, 0.102504, 0.0832587, 0.0658089, 0.057087, 0.0509493,
 ### Advanced usage
 
 Any of the flags `-n`, `-M`, `-c` or `-k` can receive multiple values in the form of a vector. When multiple values are passed, the program computes one expected SFS for every combination of values of these 4 parameters. For example, the command:
-```
-./SISiFS -n [2,50,100] -M [0.5,1,10] -c [1,10]
+``` bash
+$ ./SISiFS -n [2,50,100] -M [0.5,1,10] -c [1,10]
 ```
 results in 3 * 3 * 2 = 18 computations of an expected SFS.
 
 
 Specifying multiple values for the number of samples `-k` is incompatible with exactly specifying the sampling vector `--sv`. However, in order to support this usecase to some extent, when multiple values are specified for `-k`, the vector passed to the `--sv` flag will be interpreted as a probability distribution of the samples over the demes. For example, the command:
-```
-./SISiFS -n 20 -k [4,8,12] --sv [0.5,0.5]
+``` bash
+$ ./SISiFS -n 20 -k [4,8,12] --sv [0.5,0.5]
 ```
 will result in three computations of an expected SFS, where the sampling vectors will be [2, 2], [4, 4] and [6, 6].
 
 **Known Issue:** The program currently does not enforce that all possible combinations of sampling vectors and number of demes make sense, so please keep this in mind when specifying multiple parameters. For example, the command `./SISiFS -n 2 -k [4,8,12] --sv [0.25,0.25,0.25,0.25]` will result in nonsensical results for all three expected SFS computations, and other similar cases may result in a segmentation fault.
 
 ### Reference
-Following is a brief description of all the supported flags and their default values:
+Following is a summary of all the supported flags and their default values:
 | Short form | Long form | Description | Default value
 |---|---|---|---|
 | -h | --help | Prints a help message. | |
@@ -116,4 +116,4 @@ Following is a brief description of all the supported flags and their default va
 | -d | --steps | Approximate number of error introspection steps during computation. | 1 |
 | | --omega | Relaxation parameter for the SOR method. | 1.25 |
 | | --threads | Number of additional execution threads in parallel workloads. | #cores - 1 |
-| -v | --verbosity | Level of reporting detail. The three possible values are 0, 1 and 2. | 1 |
+| -v | --verbosity | Level of reporting detail. The possible values are 0, 1 and 2. | 0 |
